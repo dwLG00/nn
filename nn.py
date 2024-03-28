@@ -1,7 +1,7 @@
 import layers
-import numpy np
+import numpy as np
 
-class NN:
+class NeuralNet:
     def __init__(self, *l):
         self.layer_chain = l
         self.length = len(self.layer_chain)
