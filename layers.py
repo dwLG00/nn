@@ -42,7 +42,7 @@ class MatrixLayer(WeightLayer):
 
     @classmethod
     def init_random(cls, shape):
-        cls(np.empty(shape))
+        return cls(np.empty(shape))
 
 class VectorLayer(WeightLayer):
     def __init__(self, vector):
@@ -60,7 +60,7 @@ class VectorLayer(WeightLayer):
 
     @classmethod
     def init_random(cls, size):
-        cls(np.empty((size,)))
+        return cls(np.empty((size,)))
 
 class Sigmoid(Layer):
     def __init__(self, n):

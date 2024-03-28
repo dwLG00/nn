@@ -24,10 +24,13 @@ class NeuralNet:
         n_inputs = inputs.shape[0]
         grads = [0 for _ in range(n_inputs)]
 
+        net_error = 0
+
         for i, vector in enumerate(inputs):
             exp = exp_out[i]
-            res = apply(vector)
+            res = self.apply(vector)
             error = res - exp
+            net_error += error**2
 
             partial = None
             for i, layer in enumerate(self.layers[::-1]):
@@ -45,4 +48,5 @@ class NeuralNet:
             if isinstance(layer, WeightLayer):
                 layer.apply_grad(2 * grads[i] / n_inputs)
 
-        return grads
+        net_error /= n_inputs
+        return grads, net_error
