@@ -9,7 +9,7 @@ class Layer:
     def __init__(self, shape):
         self.shape = shape
 
-    def apply(vector):
+    def apply(self, vector):
         '''Takes in a vector of size shape[1] and returns a vector of size shape[0]'''
         return
 
@@ -31,13 +31,13 @@ class MatrixLayer(WeightLayer):
         self.shape = nm_array.shape
         self.array = nm_array
 
-    def apply(vector):
+    def apply(self, vector):
         return np.dot(self.array, vector)
 
     def derivative(self):
         return self.array
 
-    def weight_derivative(vector):
+    def weight_derivative(self, vector):
         return np.tensordot(np.identity(shape[1]), vector, 0)
 
     @classmethod
@@ -49,13 +49,13 @@ class VectorLayer(WeightLayer):
         self.shape = vector.shape
         self.vector = vector
 
-    def apply(vector):
+    def apply(self, vector):
         return np.vdot(self.vector, vector)
 
-    def derivative(vector):
+    def derivative(self, vector):
         return self.vector
 
-    def weight_derivative(vector):
+    def weight_derivative(self, vector):
         return vector
 
     @classmethod
@@ -66,8 +66,8 @@ class Sigmoid(Layer):
     def __init__(self, n):
         self.shape = (n,)
 
-    def apply(vector):
+    def apply(self, vector):
         return sigmoid(vector)
 
-    def derivative(vector):
+    def derivative(self, vector):
         return np.diag(dsigmoid(vector))
