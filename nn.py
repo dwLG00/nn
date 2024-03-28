@@ -33,28 +33,38 @@ class NeuralNet:
             net_error += error**2
 
             intermediates = self.intermediate[str(vector.data)][::-1]
+            intermediates.append(vector)
 
             partial = None
             for j, layer in enumerate(self.layers[::-1]):
+                if partial is None: print('Partial shape: None')
+                else: print('Partial shape: %s' % partial.shape)
                 if isinstance(layer, layers.WeightLayer):
                     if partial is None:
-                        grad = layer.weight_derivative(vector)
+                        grad = layer.weight_derivative(intermediates[j+1])
                     else:
-                        grad = np.tensordot(layer.weight_derivative(vector), partial, 0)
+                        #weight_derivative = layer.weight_derivative(intermediates[j+1])
+                        #print('Weight derivative shape: %s' % (weight_derivative.shape,))
+                        #grad = np.tensordot(weight_derivative, partial, 1)
+                        grad = np.tensordot(intermediates[j+1], partial, 0)
+                    print('Grad shape: %s' % (grad.shape,))
                     grads[j] += grad
                 if partial is None: partial = layer.derivative(vector)
                 else:
                     if i < len(intermediates):
-                        partial = np.dot(layer.derivative(intermediates[j]), partial)
+                        partial = np.dot(layer.derivative(intermediates[j+1]), partial)
                     else:
                         partial = np.dot(layer.derivative(vector), partial)
-            print('Grads %s: %s' % (i, grads))
+            #print('Grads %s: %s' % (i, grads))
+            #print('Passthrough %s' % i)
+            #print('Intermediate: %s' % self.intermediate[str(vector.data)])
+            #print('Grad shape: %s' % ([0 if g is 0 else g.shape for g in grads]))
 
 
 
         for i, layer in enumerate(self.layers[::-1]):
             if isinstance(layer, layers.WeightLayer):
-                layer.apply_grad(2 * grads[i] / n_inputs)
+                layer.apply_grad(2 * np.transpose(grads[i]) / n_inputs)
 
         net_error /= n_inputs
         return grads, net_error

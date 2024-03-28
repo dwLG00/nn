@@ -41,14 +41,14 @@ class MatrixLayer(WeightLayer):
         return np.transpose(self.array)
 
     def weight_derivative(self, vector):
-        return np.tensordot(np.identity(self.shape[1]), vector, 0)
+        return np.tensordot(np.identity(self.shape[0]), vector, 0)
 
     def apply_grad(self, matrix):
         self.array -= matrix
 
     @classmethod
     def init_random(cls, shape):
-        return cls(np.empty(shape))
+        return cls(np.random.rand(*shape))
 
 class VectorLayer(WeightLayer):
     def __init__(self, vector):
@@ -69,7 +69,7 @@ class VectorLayer(WeightLayer):
 
     @classmethod
     def init_random(cls, size):
-        return cls(np.empty((size,)))
+        return cls(np.random.rand(size))
 
 class Sigmoid(Layer):
     def __init__(self, n):
