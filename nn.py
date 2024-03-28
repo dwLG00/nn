@@ -20,7 +20,7 @@ class NeuralNet:
         self.intermediate[str(vector.data)] = intermediate
         return k
 
-    def compute_grad(self, inputs, exp_out, maxstep = 0.01):
+    def compute_grad(self, inputs, exp_out, debug=False):
         # initial pass-through
         n_inputs = inputs.shape[0]
         grads = [0 for _ in range(self.length)]
@@ -62,12 +62,10 @@ class NeuralNet:
             #print('Intermediate: %s' % self.intermediate[str(vector.data)])
             #print('Grad shape: %s' % ([0 if g is 0 else g.shape for g in grads]))
 
-
         net_error /= n_inputs
-        step_size = min(maxstep, math.e ** net_error - 1)
+        return [grad / n_inputs for grad in grads], net_error
 
+    def apply_grad(self, grads, stepsize=0.01):
         for i, layer in enumerate(self.layers[::-1]):
             if isinstance(layer, layers.WeightLayer):
-                layer.apply_grad(-step_size * np.transpose(grads[i]) / n_inputs)
-
-        return grads, net_error
+                layer.apply_grad(grads[i] * stepsize)

@@ -53,19 +53,19 @@ class MatrixLayer(WeightLayer):
 class VectorLayer(WeightLayer):
     def __init__(self, vector):
         self.shape = vector.shape
-        self.vector = vector
+        self.array = vector
 
     def apply(self, vector):
-        return np.vdot(self.vector, vector)
+        return np.vdot(self.array, vector)
 
     def derivative(self, vector):
-        return self.vector
+        return self.array
 
     def weight_derivative(self, vector):
         return vector
 
     def apply_grad(self, vector):
-        self.vector += vector
+        self.array += vector
 
     @classmethod
     def init_random(cls, size):
