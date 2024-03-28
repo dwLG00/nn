@@ -44,7 +44,7 @@ class MatrixLayer(WeightLayer):
         return np.tensordot(np.identity(self.shape[0]), vector, 0)
 
     def apply_grad(self, matrix):
-        self.array += np.transpose(matrix)
+        self.array -= np.transpose(matrix)
 
     @classmethod
     def init_random(cls, shape):
@@ -65,7 +65,7 @@ class VectorLayer(WeightLayer):
         return vector
 
     def apply_grad(self, vector):
-        self.array += vector
+        self.array -= vector
 
     @classmethod
     def init_random(cls, size):

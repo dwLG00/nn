@@ -33,11 +33,11 @@ while True:
     i += 1
     grads, net_error = net.compute_grad(data, expected)
     print('Run %s' % i)
-    print('Weights: %s' % [layer.array for layer in [layer for layer in net.layers if isinstance(layer, layers.WeightLayer)]])
-    print('Grads: %s' % grads)
+    #print('Weights: %s' % [layer.array for layer in [layer for layer in net.layers if isinstance(layer, layers.WeightLayer)]])
+    #print('Grads: %s' % grads)
     print('Net error function: %s' % net_error)
     net.apply_grad(grads)
     net.clear()
-    if input():
-        break
+    #if input():
+    #    break
 #print('Gradients: %s' % grads)

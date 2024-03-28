@@ -43,12 +43,12 @@ class NeuralNet:
                 #else: print('Partial shape: %s' % partial.shape)
                 if isinstance(layer, layers.WeightLayer):
                     if partial is None:
-                        grad = layer.weight_derivative(intermediates[j+1])
+                        grad = error * layer.weight_derivative(intermediates[j+1])
                     else:
                         #weight_derivative = layer.weight_derivative(intermediates[j+1])
                         #print('Weight derivative shape: %s' % (weight_derivative.shape,))
                         #grad = np.tensordot(weight_derivative, partial, 1)
-                        grad = np.tensordot(intermediates[j+1], partial, 0)
+                        grad = error * np.tensordot(intermediates[j+1], partial, 0)
                     #print('Grad shape: %s' % (grad.shape,))
                     grads[j] += grad
                 if partial is None: partial = layer.derivative(vector)
