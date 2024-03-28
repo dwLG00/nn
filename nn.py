@@ -12,10 +12,10 @@ class NeuralNet:
 
     def apply(self, vector):
         k = vector
-        intermediate = np.empty((self.length,))
-        for i, layer in enumerate(self.layer_chain):
+        intermediate = []
+        for layer in self.layer_chain:
             k = layer.apply(k)
-            intermediate[i] = k
+            intermediate.append(k)
         self.intermediate[vector] = intermediate
         return k
 
