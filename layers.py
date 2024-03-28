@@ -18,7 +18,10 @@ class Layer:
         return
 
 class WeightLayer(Layer):
-    def weight_derivative(self):
+    def weight_derivative(self, vector):
+        pass
+
+    def apply_grad(self, ndarray):
         pass
 
     @classmethod
@@ -34,11 +37,14 @@ class MatrixLayer(WeightLayer):
     def apply(self, vector):
         return np.dot(self.array, vector)
 
-    def derivative(self):
-        return self.array
+    def derivative(self, vector):
+        return np.transpose(self.array)
 
     def weight_derivative(self, vector):
-        return np.tensordot(np.identity(shape[1]), vector, 0)
+        return np.tensordot(np.identity(self.shape[1]), vector, 0)
+
+    def apply_grad(self, matrix):
+        self.array -= matrix
 
     @classmethod
     def init_random(cls, shape):
@@ -57,6 +63,9 @@ class VectorLayer(WeightLayer):
 
     def weight_derivative(self, vector):
         return vector
+
+    def apply_grad(self, vector):
+        self.vector -= vector
 
     @classmethod
     def init_random(cls, size):

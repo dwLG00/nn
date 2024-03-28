@@ -3,8 +3,8 @@ import numpy as np
 
 class NeuralNet:
     def __init__(self, *l):
-        self.layer_chain = l
-        self.length = len(self.layer_chain)
+        self.layers = l
+        self.length = len(self.layers)
         self.intermediate = {}
 
     def clear(self):
@@ -13,10 +13,10 @@ class NeuralNet:
     def apply(self, vector):
         k = vector
         intermediate = []
-        for layer in self.layer_chain:
+        for layer in self.layers:
             k = layer.apply(k)
             intermediate.append(k)
-        self.intermediate[vector] = intermediate
+        self.intermediate[str(vector.data)] = intermediate
         return k
 
     def compute_grad(self, inputs, exp_out):
@@ -32,20 +32,28 @@ class NeuralNet:
             error = res - exp
             net_error += error**2
 
+            intermediates = self.intermediate[str(vector.data)][::-1]
+
             partial = None
-            for i, layer in enumerate(self.layers[::-1]):
-                if isinstance(layer, WeightLayer):
-                    if not partial:
+            for j, layer in enumerate(self.layers[::-1]):
+                if isinstance(layer, layers.WeightLayer):
+                    if partial is None:
                         grad = layer.weight_derivative(vector)
                     else:
                         grad = np.tensordot(layer.weight_derivative(vector), partial, 0)
-                    grads[i] += grad
-                if not partial: partial = layer.derivative(vector)
+                    grads[j] += grad
+                if partial is None: partial = layer.derivative(vector)
                 else:
-                    partial = np.dot(layer.derivative(vector), partial)
+                    if i < len(intermediates):
+                        partial = np.dot(layer.derivative(intermediates[j]), partial)
+                    else:
+                        partial = np.dot(layer.derivative(vector), partial)
+            print('Grads %s: %s' % (i, grads))
+
+
 
         for i, layer in enumerate(self.layers[::-1]):
-            if isinstance(layer, WeightLayer):
+            if isinstance(layer, layers.WeightLayer):
                 layer.apply_grad(2 * grads[i] / n_inputs)
 
         net_error /= n_inputs
