@@ -3,6 +3,7 @@ import layers
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import time
 
 # A: 2 -> 2
 # B: 2 -> 2
@@ -32,6 +33,7 @@ print('C: %s' % C.vector)
 
 '''
 errors = []
+start = time.time()
 for i in range(10000):
     data, expected = gen_data()
     grads, net_error = net.compute_grad(data, expected)
@@ -42,6 +44,9 @@ for i in range(10000):
     net.apply_grad(grads)
     net.clear()
     errors.append(net_error)
+
+end = time.time()
+print('Took %s' % (end - start))
 
 plt.plot(errors)
 plt.show()
