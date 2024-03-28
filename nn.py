@@ -1,5 +1,6 @@
 import layers
 import numpy as np
+import math
 
 class NeuralNet:
     def __init__(self, *l):
@@ -19,10 +20,10 @@ class NeuralNet:
         self.intermediate[str(vector.data)] = intermediate
         return k
 
-    def compute_grad(self, inputs, exp_out):
+    def compute_grad(self, inputs, exp_out, maxstep = 0.01):
         # initial pass-through
         n_inputs = inputs.shape[0]
-        grads = [0 for _ in range(n_inputs)]
+        grads = [0 for _ in range(self.length)]
 
         net_error = 0
 
@@ -30,6 +31,7 @@ class NeuralNet:
             exp = exp_out[i]
             res = self.apply(vector)
             error = res - exp
+            #print('res, exp: %s, %s' % (res, exp))
             net_error += error**2
 
             intermediates = self.intermediate[str(vector.data)][::-1]
@@ -37,8 +39,8 @@ class NeuralNet:
 
             partial = None
             for j, layer in enumerate(self.layers[::-1]):
-                if partial is None: print('Partial shape: None')
-                else: print('Partial shape: %s' % partial.shape)
+                #if partial is None: print('Partial shape: None')
+                #else: print('Partial shape: %s' % partial.shape)
                 if isinstance(layer, layers.WeightLayer):
                     if partial is None:
                         grad = layer.weight_derivative(intermediates[j+1])
@@ -47,11 +49,11 @@ class NeuralNet:
                         #print('Weight derivative shape: %s' % (weight_derivative.shape,))
                         #grad = np.tensordot(weight_derivative, partial, 1)
                         grad = np.tensordot(intermediates[j+1], partial, 0)
-                    print('Grad shape: %s' % (grad.shape,))
+                    #print('Grad shape: %s' % (grad.shape,))
                     grads[j] += grad
                 if partial is None: partial = layer.derivative(vector)
                 else:
-                    if i < len(intermediates):
+                    if j < len(intermediates):
                         partial = np.dot(layer.derivative(intermediates[j+1]), partial)
                     else:
                         partial = np.dot(layer.derivative(vector), partial)
@@ -61,10 +63,11 @@ class NeuralNet:
             #print('Grad shape: %s' % ([0 if g is 0 else g.shape for g in grads]))
 
 
+        net_error /= n_inputs
+        step_size = min(maxstep, math.e ** net_error - 1)
 
         for i, layer in enumerate(self.layers[::-1]):
             if isinstance(layer, layers.WeightLayer):
-                layer.apply_grad(2 * np.transpose(grads[i]) / n_inputs)
+                layer.apply_grad(-step_size * np.transpose(grads[i]) / n_inputs)
 
-        net_error /= n_inputs
         return grads, net_error
