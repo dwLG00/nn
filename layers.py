@@ -21,6 +21,9 @@ class WeightLayer(Layer):
     def weight_derivative(self):
         pass
 
+    @classmethod
+    def init_random(cls, size):
+        pass
 
 class MatrixLayer(WeightLayer):
     def __init__(self, nm_array):
@@ -37,6 +40,10 @@ class MatrixLayer(WeightLayer):
     def weight_derivative(vector):
         return np.tensordot(np.identity(shape[1]), vector, 0)
 
+    @classmethod
+    def init_random(cls, shape):
+        cls(np.empty(shape))
+
 class VectorLayer(WeightLayer):
     def __init__(self, vector):
         self.shape = vector.shape
@@ -50,6 +57,10 @@ class VectorLayer(WeightLayer):
 
     def weight_derivative(vector):
         return vector
+
+    @classmethod
+    def init_random(cls, size):
+        cls(np.empty((size,)))
 
 class Sigmoid(Layer):
     def __init__(self, n):
