@@ -5,6 +5,14 @@ def dsigmoid(x):
     fx = sigmoid(x)
     return fx * (1 - fx)
 
+def relu(x):
+    if x > 0: return x
+    return 0
+
+def drelu(x):
+    if x > 0: return 1
+    return 0
+
 class Layer:
     def __init__(self, shape):
         self.shape = shape
@@ -80,3 +88,16 @@ class Sigmoid(Layer):
 
     def derivative(self, vector):
         return np.diag(dsigmoid(vector))
+
+class ReLU(Layer):
+    def __init__(self, n):
+        self.shape = (n,)
+        self.func = np.vectorize(relu)
+        self.dfunc = np.vectorize(drelu)
+
+    def apply(self, vector):
+        return self.func(vector)
+
+    def derivative(self, vector):
+        return self.dfunc(vector)
+
