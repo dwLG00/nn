@@ -13,10 +13,10 @@ A = layers.MatrixLayer.init_random((5, 2))
 B = layers.MatrixLayer.init_random((4, 5))
 C = layers.VectorLayer.init_random(4)
 
-net = NeuralNet(A, layers.ReLU(5), B, layers.ReLU(4), C)
+net = NeuralNet(A, layers.ReLU(5), B, layers.Sigmoid(4), C)
 
 # Let z = x**2 + y
-z = lambda x: x[0]
+z = lambda x: x[0] + max(x[0], x[1]) - min(x[0], x[1] - 3)
 
 def gen_data():
     data = np.random.rand(100, 2)
