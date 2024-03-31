@@ -99,5 +99,5 @@ class ReLU(Layer):
         return self.func(vector)
 
     def derivative(self, vector):
-        return self.dfunc(vector)
+        return np.diag(self.dfunc(vector))
 

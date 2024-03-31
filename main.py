@@ -5,15 +5,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 
-# A: 2 -> 2
-# B: 2 -> 2
-# C: 2 -> 1
+# A: 2 -> 5
+# B: 5 -> 4
+# C: 4 -> 1
 
 A = layers.MatrixLayer.init_random((5, 2))
 B = layers.MatrixLayer.init_random((4, 5))
 C = layers.VectorLayer.init_random(4)
 
-net = NeuralNet(A, layers.Sigmoid(5), B, layers.Sigmoid(4), C)
+net = NeuralNet(A, layers.ReLU(5), B, layers.ReLU(4), C)
 
 # Let z = x**2 + y
 z = lambda x: x[0]
