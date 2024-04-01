@@ -101,3 +101,12 @@ class ReLU(Layer):
     def derivative(self, vector):
         return np.diag(self.dfunc(vector))
 
+class Identity(Layer):
+    def __init__(self, n):
+        self.shape = (n,)
+
+    def apply(self, vector):
+        return vector
+
+    def derivative(self, vector):
+        return np.identity(self.shape[0])
