@@ -11,6 +11,7 @@ def mnist_train_batch(batchsize):
     (train_img, train_label), (_, _) = mnist.load_data()
     # train_img.shape = (60000, 28, 28) -> (60000, 28*28)
     train_img = train_img.reshape(-1, 28*28)
+    train_label = relabel_labels(train_label)
 
     n_batches = 60000 // batchsize
 
@@ -23,22 +24,27 @@ def mnist_train_batch(batchsize):
 def mnist_test_iter():
     (_, _), (test_img, test_label) = mnist.load_data()
     test_img = test_img.reshape(-1, 28*28)
+    test_label = relabel_labels(test_label)
 
     for i in range(10000):
         yield (test_img[i], test_label[i])
 
-def relable_labels(mnist_labels):
+def relabel_labels(mnist_labels):
     '''MNIST has the raw numbers as the labels; we want to have a unit vector with the n-th value as 1'''
     length = mnist_labels.shape[0] #this should be (n,)
-    out = np.zeroes((length, 10)) #10 different digits
+    out = np.zeros((length, 10)) #10 different digits
     for i, n in enumerate(mnist_labels):
         out[i][n] = 1
 
     return out
 
+def eval_binary(res, label):
+    '''Given output vector and label vector, checks if the highest-probability category of the result is the label'''
+    return label[np.argmax(res)] == 1
+
 if __name__ == '__main__':
     BATCHSIZE = 50
-    TRAIN_COUNT = 50
+    TRAIN_COUNT = 5
     STEP_RATE = (1/2)**(1/10)
 
     # A: 28x28 -> 28*14
@@ -54,24 +60,23 @@ if __name__ == '__main__':
     net = NeuralNet(A, Sigmoid(28*14), B, Sigmoid(14*14), C, Sigmoid(7*7), D)
     '''
     A = MatrixLayer.init_random((28, 28*28))
-    B = VectorLayer.init_random(28)
-    net = NeuralNet(A, Sigmoid(28), B)
+    B = MatrixLayer.init_random((10, 28))
+
+    net = NeuralNet(A, Sigmoid(28), B, Sigmoid(10))
     # start training
     for j in range(TRAIN_COUNT):
         print('Training generation: %s' % (j+1))
-        steps = 0.01 * STEP_RATE**j
+        #steps = 0.01 * STEP_RATE**j
         for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
-            grads, net_error = net.compute_grad(imgs, labels)
+            grads, net_error = net.compute_grad_multi(imgs, labels)
             print("Batch %s, net error: %s" % (i, net_error))
-            net.apply_grad(grads, steps)
+            #net.apply_grad(grads, steps)
+            net.apply_grad(grads)
             net.clear()
 
     successes = 0
-    valids = 0
     for (img, label) in tqdm(mnist_test_iter()):
         res = net.apply(img)
-        if evaluate(res, label): successes += 1
-        if valid(res): valids += 1
+        if eval_binary(res, label): successes += 1
 
     print("%s successes out of 10000 (%s percent)" % (successes, successes / 100))
-    print("%s valid outputs out of 10000 (%s percent)" % (valids, valids / 100))
