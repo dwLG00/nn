@@ -63,7 +63,39 @@ class NeuralNet:
             #print('Grad shape: %s' % ([0 if g is 0 else g.shape for g in grads]))
 
         net_error /= n_inputs
-        return [grad / n_inputs for grad in grads], net_error
+        rms = math.sqrt(net_error)
+        return [grad / n_inputs for grad in grads], rms
+
+    def compute_grad_multi(self, inputs, exp_out, debug=False):
+        n_inputs = inputs.shape[0]
+        grads = [0 for _ in range(self.length)]
+
+        net_error = 0
+
+        for i, vector in range(inputs):
+            exp = exp_out[i]
+            res = self.apply(vector)
+            error_vec = res - exp
+            error = np.dot(error_vec, error_vec)
+            net_error += error
+
+            intermediates = self.intermediate[str(vector.data)][::-1]
+            intermediates.append(vector)
+
+            partial = error_vec
+            for j, layer in self.enumerate(self.layers[::-1]):
+                if isinstance(layer, layers.WeightLayer):
+                    grad = np.tensordot(intermediates[j+1], partial, 0)
+                    grads[j] += grad
+                else:
+                    if j < len(intermediates):
+                        partial = np.dot(layer.derivative(intermediates[j+1]), partial)
+                    else:
+                        partial = np.dot(layer.derivative(vector), partial)
+
+        net_error /= n_inputs
+        rms = math.sqrt(net_error)
+        return [grad / n_inputs for grad in grads], rms
 
     def apply_grad(self, grads, stepsize=0.01):
         for i, layer in enumerate(self.layers[::-1]):
