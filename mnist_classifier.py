@@ -62,7 +62,7 @@ if __name__ == '__main__':
     A = MatrixLayer.init_random((28, 28*28))
     B = MatrixLayer.init_random((10, 28))
 
-    net = NeuralNet(A, Sigmoid(28), B, Sigmoid(10))
+    net = NeuralNet(A, ReLU(28), B, Sigmoid(10))
     # start training
     for j in range(TRAIN_COUNT):
         print('Training generation: %s' % (j+1))

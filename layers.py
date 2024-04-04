@@ -25,6 +25,9 @@ class Layer:
         '''Derivative wrt input'''
         return
 
+    def __repr__(self):
+        return 'Layer%s' % (tuple(shape),)
+
 class WeightLayer(Layer):
     def weight_derivative(self, vector):
         pass
@@ -58,6 +61,9 @@ class MatrixLayer(WeightLayer):
     def init_random(cls, shape):
         return cls(np.random.rand(*shape))
 
+    def __repr__(self):
+        return 'MatrixLayer(%s, %s)' % self.shape
+
 class VectorLayer(WeightLayer):
     def __init__(self, vector):
         self.shape = vector.shape
@@ -79,6 +85,9 @@ class VectorLayer(WeightLayer):
     def init_random(cls, size):
         return cls(np.random.rand(size))
 
+    def __repr__(self):
+        return 'VectorLayer(%s)' % self.shape[0]
+
 class Sigmoid(Layer):
     def __init__(self, n):
         self.shape = (n,)
@@ -88,6 +97,9 @@ class Sigmoid(Layer):
 
     def derivative(self, vector):
         return np.diag(dsigmoid(vector))
+
+    def __repr__(self):
+        return 'Sigmoid(%s)' % self.shape
 
 class ReLU(Layer):
     def __init__(self, n):
@@ -101,6 +113,9 @@ class ReLU(Layer):
     def derivative(self, vector):
         return np.diag(self.dfunc(vector))
 
+    def __repr__(self):
+        return 'ReLU(%s)' % self.shape
+
 class Identity(Layer):
     def __init__(self, n):
         self.shape = (n,)
@@ -110,3 +125,6 @@ class Identity(Layer):
 
     def derivative(self, vector):
         return np.identity(self.shape[0])
+
+    def __repr__(self):
+        return 'Identity(%s)' % self.shape

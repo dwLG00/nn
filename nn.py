@@ -86,14 +86,16 @@ class NeuralNet:
 
             partial = error_vec
             for j, layer in enumerate(self.layers[::-1]):
-                if debug: print('Layer %s, partial: %s' % (j, partial))
+                if debug: print('Layer %s: %s, partial: %s' % (j, layer, partial))
                 if isinstance(layer, layers.WeightLayer):
                     grad = np.tensordot(intermediates[j+1], partial, 0)
                     grads[j] += grad
                 if j < len(intermediates):
                     derivative = layer.derivative(intermediates[j+1])
+                    if debug: print('Computed derivative on %s' % intermediates[j+1])
                 else:
                     derivative = layer.derivative(vector)
+                    if debug: print('Computed derivative on %s' % vector)
                 print('Derivative: %s' % derivative)
                 partial = np.dot(derivative, partial)
                 if debug: input()
