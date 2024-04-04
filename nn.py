@@ -74,6 +74,7 @@ class NeuralNet:
         net_error = 0
 
         for i, vector in enumerate(inputs):
+            if debug: print('Datapoint %s' % i)
             exp = exp_out[i]
             res = self.apply(vector)
             error_vec = res - exp
@@ -85,13 +86,17 @@ class NeuralNet:
 
             partial = error_vec
             for j, layer in enumerate(self.layers[::-1]):
+                if debug: print('Layer %s, partial: %s' % (j, partial))
                 if isinstance(layer, layers.WeightLayer):
                     grad = np.tensordot(intermediates[j+1], partial, 0)
                     grads[j] += grad
                 if j < len(intermediates):
-                    partial = np.dot(layer.derivative(intermediates[j+1]), partial)
+                    derivative = layer.derivative(intermediates[j+1])
                 else:
-                    partial = np.dot(layer.derivative(vector), partial)
+                    derivative = layer.derivative(vector)
+                print('Derivative: %s' % derivative)
+                partial = np.dot(derivative, partial)
+                if debug: input()
 
         net_error /= n_inputs
         #rms = math.sqrt(net_error)

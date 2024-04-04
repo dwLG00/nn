@@ -68,15 +68,23 @@ if __name__ == '__main__':
         print('Training generation: %s' % (j+1))
         #steps = 0.01 * STEP_RATE**j
         for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
-            grads, net_error = net.compute_grad_multi(imgs, labels)
+            grads, net_error = net.compute_grad_multi(imgs, labels, debug=True)
             print("Batch %s, net error: %s" % (i, net_error))
             #net.apply_grad(grads, steps)
-            net.apply_grad(grads)
+            print('Gradients: %s' % grads)
+            net.apply_grad(grads, 0.05)
             net.clear()
+            input()
 
     successes = 0
-    for (img, label) in tqdm(mnist_test_iter()):
+    for (img, label) in mnist_test_iter():
         res = net.apply(img)
+        print('Expected: %s' % label)
+        print('Got: %s' % res)
+        evec = res - label
+        error = np.dot(evec, evec)
+        print('Difference: %s' % error)
         if eval_binary(res, label): successes += 1
+        input()
 
     print("%s successes out of 10000 (%s percent)" % (successes, successes / 100))
