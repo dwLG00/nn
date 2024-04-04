@@ -28,10 +28,13 @@ def mnist_test_iter():
         yield (test_img[i], test_label[i])
 
 evaluate = lambda result, expected: round(result) == expected
+valid = lambda result: 0 <= round(result) <= 9
 vevaluate = np.vectorize(evaluate)
 
 if __name__ == '__main__':
     BATCHSIZE = 50
+    TRAIN_COUNT = 50
+    STEP_RATE = (1/2)**(1/10)
 
     # A: 28x28 -> 28*14
     # B: 28*14 -> 14*14
@@ -49,15 +52,21 @@ if __name__ == '__main__':
     B = VectorLayer.init_random(28)
     net = NeuralNet(A, Sigmoid(28), B)
     # start training
-    for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
-        grads, net_error = net.compute_grad(imgs, labels)
-        print("Batch %s, net error: %s" % (i, net_error))
-        net.apply_grad(grads)
-        net.clear()
+    for j in range(TRAIN_COUNT):
+        print('Training generation: %s' % (j+1))
+        steps = 0.01 * STEP_RATE**j
+        for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
+            grads, net_error = net.compute_grad(imgs, labels)
+            print("Batch %s, net error: %s" % (i, net_error))
+            net.apply_grad(grads, steps)
+            net.clear()
 
     successes = 0
+    valids = 0
     for (img, label) in tqdm(mnist_test_iter()):
         res = net.apply(img)
         if evaluate(res, label): successes += 1
+        if valid(res): valids += 1
 
     print("%s successes out of 10000 (%s percent)" % (successes, successes / 100))
+    print("%s valid outputs out of 10000 (%s percent)" % (valids, valids / 100))
