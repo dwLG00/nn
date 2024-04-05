@@ -112,7 +112,7 @@ class NeuralNet:
                 layer.apply_grad(grads[i] * stepsize)
 
     def dump(self, target):
-        with open(target, 'w') as f:
+        with open(target, 'wb') as f:
             pickle.dump(self, f)
 
     @staticmethod
