@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.special import expit as sigmoid
+from scipy.special import softmax
 
 def dsigmoid(x):
     fx = sigmoid(x)
@@ -26,7 +27,8 @@ class Layer:
         return
 
     def __repr__(self):
-        return 'Layer%s' % (tuple(shape),)
+        replacement_str = ', '.join('%s' for _ in self.shape)
+        return 'Layer(%s)' % (replacement_str % self.shape)
 
 class WeightLayer(Layer):
     def weight_derivative(self, vector):
@@ -59,7 +61,7 @@ class MatrixLayer(WeightLayer):
 
     @classmethod
     def init_random(cls, shape):
-        return cls(np.random.rand(*shape))
+        return cls(np.random.rand(*shape)*2 - 1)
 
     def __repr__(self):
         return 'MatrixLayer(%s, %s)' % self.shape
@@ -128,3 +130,21 @@ class Identity(Layer):
 
     def __repr__(self):
         return 'Identity(%s)' % self.shape
+
+class Softmax(Layer):
+    # thanks https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
+    def __init__(self, n):
+        self.shape = (n,)
+
+    def apply(self, vector):
+        shift = vector - np.max(vector)
+        return softmax(shift)
+
+    def derivative(self, vector):
+        sm_value = softmax(vector)
+        deriv = np.outer(sm_value, sm_value)
+        diagonalized = np.diag(sm_value)
+        return diagonalized - deriv
+
+    def __repr__(self):
+        return 'Softmax(%s)' % self.shape

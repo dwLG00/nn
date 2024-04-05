@@ -96,7 +96,7 @@ class NeuralNet:
                 else:
                     derivative = layer.derivative(vector)
                     if debug: print('Computed derivative on %s' % vector)
-                print('Derivative: %s' % derivative)
+                if debug: print('Derivative: %s' % derivative)
                 partial = np.dot(derivative, partial)
                 if debug: input()
 

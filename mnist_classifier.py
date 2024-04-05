@@ -10,7 +10,7 @@ from tqdm import tqdm
 def mnist_train_batch(batchsize):
     (train_img, train_label), (_, _) = mnist.load_data()
     # train_img.shape = (60000, 28, 28) -> (60000, 28*28)
-    train_img = train_img.reshape(-1, 28*28)
+    train_img = train_img.reshape(-1, 28*28) / 255
     train_label = relabel_labels(train_label)
 
     n_batches = 60000 // batchsize
@@ -23,7 +23,7 @@ def mnist_train_batch(batchsize):
 
 def mnist_test_iter():
     (_, _), (test_img, test_label) = mnist.load_data()
-    test_img = test_img.reshape(-1, 28*28)
+    test_img = test_img.reshape(-1, 28*28) / 255
     test_label = relabel_labels(test_label)
 
     for i in range(10000):
@@ -46,6 +46,8 @@ if __name__ == '__main__':
     BATCHSIZE = 50
     TRAIN_COUNT = 5
     STEP_RATE = (1/2)**(1/10)
+    DEBUG = False
+    SHOW_TESTS = False
 
     # A: 28x28 -> 28*14
     # B: 28*14 -> 14*14
@@ -62,29 +64,30 @@ if __name__ == '__main__':
     A = MatrixLayer.init_random((28, 28*28))
     B = MatrixLayer.init_random((10, 28))
 
-    net = NeuralNet(A, ReLU(28), B, Sigmoid(10))
+    net = NeuralNet(A, ReLU(28), B, Softmax(10))
     # start training
     for j in range(TRAIN_COUNT):
         print('Training generation: %s' % (j+1))
         #steps = 0.01 * STEP_RATE**j
         for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
-            grads, net_error = net.compute_grad_multi(imgs, labels, debug=True)
+            grads, net_error = net.compute_grad_multi(imgs, labels, debug=DEBUG)
             print("Batch %s, net error: %s" % (i, net_error))
             #net.apply_grad(grads, steps)
-            print('Gradients: %s' % grads)
+            if DEBUG: print('Gradients: %s' % grads)
             net.apply_grad(grads, 0.05)
             net.clear()
-            input()
+            if DEBUG: input()
 
     successes = 0
     for (img, label) in mnist_test_iter():
         res = net.apply(img)
-        print('Expected: %s' % label)
-        print('Got: %s' % res)
         evec = res - label
         error = np.dot(evec, evec)
-        print('Difference: %s' % error)
         if eval_binary(res, label): successes += 1
-        input()
+        if SHOW_TESTS:
+            print('Expected: %s' % label)
+            print('Got: %s' % res)
+            print('Difference: %s' % error)
+            input()
 
     print("%s successes out of 10000 (%s percent)" % (successes, successes / 100))
