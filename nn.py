@@ -21,6 +21,13 @@ class NeuralNet:
         self.intermediate[str(vector.data)] = intermediate
         return k
 
+    def inverse(self, vector):
+        vec = np.copy(vector)
+        for layers in self.layers[::-1]:
+            vec = layers.inverse(vec)
+
+        return vec
+
     def compute_grad(self, inputs, exp_out, debug=False):
         # initial pass-through
         n_inputs = inputs.shape[0]

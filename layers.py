@@ -59,6 +59,10 @@ class MatrixLayer(WeightLayer):
     def apply_grad(self, matrix):
         self.array -= np.transpose(matrix)
 
+    def inverse(self, vector):
+        pinv = np.linalg.pinv(self.array)
+        return np.dot(pinv, vector)
+
     @classmethod
     def init_random(cls, shape):
         return cls(np.random.rand(*shape)*2 - 1)
@@ -100,6 +104,9 @@ class Sigmoid(Layer):
     def derivative(self, vector):
         return np.diag(dsigmoid(vector))
 
+    def inverse(self, vector):
+        return np.log(vector) - np.log(1 - vector)
+
     def __repr__(self):
         return 'Sigmoid(%s)' % self.shape
 
@@ -115,6 +122,12 @@ class ReLU(Layer):
     def derivative(self, vector):
         return np.diag(self.dfunc(vector))
 
+    def inverse(self, vector): #Not invertible, so we'll find a good "pseudoinverse"
+        maxvalue = np.amax(vector)
+        vec = np.copy(vector)
+        vec[vec == 0] = -maxvalue
+        return vec
+
     def __repr__(self):
         return 'ReLU(%s)' % self.shape
 
@@ -127,6 +140,9 @@ class Identity(Layer):
 
     def derivative(self, vector):
         return np.identity(self.shape[0])
+
+    def inverse(self, vector):
+        return vector
 
     def __repr__(self):
         return 'Identity(%s)' % self.shape
@@ -145,6 +161,11 @@ class Softmax(Layer):
         deriv = np.outer(sm_value, sm_value)
         diagonalized = np.diag(sm_value)
         return diagonalized - deriv
+
+    def inverse(self, vector):
+        vec = np.copy(vector)
+        vec[vec == 0] = 0.00001
+        return np.log(vector)
 
     def __repr__(self):
         return 'Softmax(%s)' % self.shape
