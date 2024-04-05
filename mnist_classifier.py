@@ -45,9 +45,9 @@ def eval_binary(res, label):
 if __name__ == '__main__':
     BATCHSIZE = 50
     TRAIN_COUNT = 5
-    STEP_RATE = (1/2)**(1/10)
+    STEP_RATE = (1/2)**(1/5)
     DEBUG = False
-    SHOW_TESTS = False
+    SHOW_TESTS = True
 
     # A: 28x28 -> 28*14
     # B: 28*14 -> 14*14
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     # start training
     for j in range(TRAIN_COUNT):
         print('Training generation: %s' % (j+1))
-        #steps = 0.01 * STEP_RATE**j
+        #steps = 0.05 * STEP_RATE**j
         for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
             grads, net_error = net.compute_grad_multi(imgs, labels, debug=DEBUG)
             print("Batch %s, net error: %s" % (i, net_error))
@@ -88,6 +88,7 @@ if __name__ == '__main__':
             print('Expected: %s' % label)
             print('Got: %s' % res)
             print('Difference: %s' % error)
+            print('Success!' if eval_binary(res, label) else 'Fail!')
             input()
 
     print("%s successes out of 10000 (%s percent)" % (successes, successes / 100))
