@@ -44,10 +44,10 @@ def eval_binary(res, label):
 
 if __name__ == '__main__':
     BATCHSIZE = 50
-    TRAIN_COUNT = 5
-    STEP_RATE = (1/2)**(1/5)
+    TRAIN_COUNT = 20
+    STEP_RATE = (1/2)**(1/20)
     DEBUG = False
-    SHOW_TESTS = True
+    SHOW_TESTS = False
 
     # A: 28x28 -> 28*14
     # B: 28*14 -> 14*14
@@ -61,30 +61,32 @@ if __name__ == '__main__':
 
     net = NeuralNet(A, Sigmoid(28*14), B, Sigmoid(14*14), C, Sigmoid(7*7), D)
     '''
-    A = MatrixLayer.init_random((28, 28*28))
-    B = MatrixLayer.init_random((10, 28))
+    A = MatrixLayer.init_random((28*7, 28*28))
+    B = MatrixLayer.init_random((28, 28*7))
+    C = MatrixLayer.init_random((10, 28))
 
-    net = NeuralNet(A, ReLU(28), B, Softmax(10))
+    net = NeuralNet(A, ReLU(28*7), B, ReLU(28), C, Softmax(10))
     # start training
     for j in range(TRAIN_COUNT):
         print('Training generation: %s' % (j+1))
-        #steps = 0.05 * STEP_RATE**j
+        steps = 0.05 * STEP_RATE**j
         for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
             grads, net_error = net.compute_grad_multi(imgs, labels, debug=DEBUG)
             print("Batch %s, net error: %s" % (i, net_error))
-            #net.apply_grad(grads, steps)
+            net.apply_grad(grads, steps)
             if DEBUG: print('Gradients: %s' % grads)
-            net.apply_grad(grads, 0.05)
+            #net.apply_grad(grads, 0.05)
             net.clear()
             if DEBUG: input()
 
     successes = 0
-    for (img, label) in mnist_test_iter():
+    for i, (img, label) in enumerate(mnist_test_iter()):
         res = net.apply(img)
         evec = res - label
         error = np.dot(evec, evec)
         if eval_binary(res, label): successes += 1
         if SHOW_TESTS:
+            print('Test Data #%s' % i)
             print('Expected: %s' % label)
             print('Got: %s' % res)
             print('Difference: %s' % error)
