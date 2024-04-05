@@ -47,6 +47,7 @@ if __name__ == '__main__':
     TRAIN_COUNT = 20
     STEP_RATE = (1/2)**(1/20)
     DEBUG = False
+    VERBOSE = True
     SHOW_TESTS = False
 
     # A: 28x28 -> 28*14
@@ -67,17 +68,33 @@ if __name__ == '__main__':
 
     net = NeuralNet(A, ReLU(28*7), B, ReLU(28), C, Softmax(10))
     # start training
-    for j in range(TRAIN_COUNT):
+    j = 0
+    net_error_avgs = []
+    #for j in range(TRAIN_COUNT):
+    while True:
         print('Training generation: %s' % (j+1))
         steps = 0.05 * STEP_RATE**j
+        net_error_sum = 0
         for i, (imgs, labels) in enumerate(mnist_train_batch(BATCHSIZE)):
             grads, net_error = net.compute_grad_multi(imgs, labels, debug=DEBUG)
-            print("Batch %s, net error: %s" % (i, net_error))
-            net.apply_grad(grads, steps)
+            if VERBOSE: print("Batch %s, net error: %s" % (i, net_error))
+            #net.apply_grad(grads, steps)
             if DEBUG: print('Gradients: %s' % grads)
-            #net.apply_grad(grads, 0.05)
+            net.apply_grad(grads, 0.05)
             net.clear()
+            net_error_sum += net_error
             if DEBUG: input()
+        net_error_avg = net_error_sum / (60000 // BATCHSIZE)
+        if VERBOSE: print('Net error average: %s' % net_error_avg)
+        if len(net_error_avgs) >= 3:
+            rolling_net_error_mean = np.mean(net_error_avgs[-3:])
+            if rolling_net_error_mean * 1.1 < net_error_avg: # needs to be 10% better than rolling average
+                if DEBUG or VERBOSE: print("Rolling net error mean less than net error (%s < %s), breaking..." % (rolling_net_error_mean, net_error_avg))
+                break
+        net_error_avgs.append(net_error_avg)
+        j += 1
+
+    print("%s iterations completed" % j)
 
     successes = 0
     for i, (img, label) in enumerate(mnist_test_iter()):
@@ -94,3 +111,4 @@ if __name__ == '__main__':
             input()
 
     print("%s successes out of 10000 (%s percent)" % (successes, successes / 100))
+    net.dump('mnist-model.pkl')

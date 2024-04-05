@@ -1,6 +1,7 @@
 import layers
 import numpy as np
 import math
+import pickle
 
 class NeuralNet:
     def __init__(self, *l):
@@ -109,3 +110,12 @@ class NeuralNet:
         for i, layer in enumerate(self.layers[::-1]):
             if isinstance(layer, layers.WeightLayer):
                 layer.apply_grad(grads[i] * stepsize)
+
+    def dump(self, target):
+        with open(target, 'w') as f:
+            pickle.dump(self, f)
+
+    @staticmethod
+    def load(self, target):
+        with open(target, 'rb') as f:
+            return pickle.load(f)
