@@ -118,6 +118,18 @@ class NeuralNet:
             if isinstance(layer, layers.WeightLayer):
                 layer.apply_grad(grads[i] * stepsize)
 
+    def autotrain(self, batches_input, batches_labels, multi=False, stepsize=0.01, stopfunction=rolling_stop(3), debug=False):
+        net_errors = []
+        compute_grad = self.compute_grad_multi if multi else self.compute_grad
+        while not stopfunction(net_errors):
+            cum_net_error = 0
+            for i, (batch_input, batch_label) in enumerate(zip(batches_input, batches_label)):
+                grad, net_error = compute_grad(batch_input, batch_label, debug=debug)
+                self.apply_grad(grad, stepsize=stepsize)
+                cum_net_error += net_error
+            avg_net_error = cum_net_error / (i + 1)
+            net_errors.append(avg_net_error)
+
     def dump(self, target):
         with open(target, 'wb') as f:
             pickle.dump(self, f)
@@ -126,3 +138,10 @@ class NeuralNet:
     def load(self, target):
         with open(target, 'rb') as f:
             return pickle.load(f)
+
+def limit(n):
+    return lambda net_errors: len(net_errors) == n
+
+def rolling_stop(n, bias=1):
+    return lambda net_errors: len(net_errors) > (n + 1) and sum(net_errors[-(n+1):-1]) / n < bias * net_errors[-1]
+
