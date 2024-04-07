@@ -6,7 +6,6 @@ Small neural net framework, written using numpy. Intended as a learning exercise
 ```py
 from nn import nn, layers
 import numpy as np
-from keras.datasets import mnist
 
 # Data
 f = lambda x: round(sum(x)) #this will be our classifier heuristic
