@@ -3,6 +3,14 @@ import numpy as np
 import math
 import pickle
 
+
+def limit(n):
+    return lambda net_errors: len(net_errors) == n
+
+def rolling_stop(n, bias=1):
+    return lambda net_errors: len(net_errors) > (n + 1) and sum(net_errors[-(n+1):-1]) / n < bias * net_errors[-1]
+
+
 class NeuralNet:
     def __init__(self, *l):
         self.layers = l
@@ -123,7 +131,7 @@ class NeuralNet:
         compute_grad = self.compute_grad_multi if multi else self.compute_grad
         while not stopfunction(net_errors):
             cum_net_error = 0
-            for i, (batch_input, batch_label) in enumerate(zip(batches_input, batches_label)):
+            for i, (batch_input, batch_label) in enumerate(zip(batches_input, batches_labels)):
                 grad, net_error = compute_grad(batch_input, batch_label, debug=debug)
                 self.apply_grad(grad, stepsize=stepsize)
                 cum_net_error += net_error
@@ -138,10 +146,3 @@ class NeuralNet:
     def load(self, target):
         with open(target, 'rb') as f:
             return pickle.load(f)
-
-def limit(n):
-    return lambda net_errors: len(net_errors) == n
-
-def rolling_stop(n, bias=1):
-    return lambda net_errors: len(net_errors) > (n + 1) and sum(net_errors[-(n+1):-1]) / n < bias * net_errors[-1]
-
