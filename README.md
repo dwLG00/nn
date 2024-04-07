@@ -28,7 +28,12 @@ net = nn.NeuralNet(
     layers.Softplus(4)
 )
 
-net.autotrain(np.split(training_input, 100), np.split(training_labels, 100), multi=True, stopfunction=limit(20))
+net.autotrain(
+    np.split(training_input, 100),
+    np.split(training_labels, 100),
+    multi=True, 
+    stopfunction=nn.limit(20)
+)
 
 successes = 0
 for x, y in zip(test_input, test_labels):
