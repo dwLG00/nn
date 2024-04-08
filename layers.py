@@ -163,9 +163,9 @@ class Softmax(Layer):
         return diagonalized - deriv
 
     def inverse(self, vector):
-        vec = np.copy(vector)
+        vec = np.copy(vector).astype('float')
         vec[vec == 0] = 0.00001
-        return np.log(vector)
+        return vec
 
     def __repr__(self):
         return 'Softmax(%s)' % self.shape

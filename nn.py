@@ -143,6 +143,6 @@ class NeuralNet:
             pickle.dump(self, f)
 
     @staticmethod
-    def load(self, target):
+    def load(target):
         with open(target, 'rb') as f:
             return pickle.load(f)
