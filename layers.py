@@ -164,8 +164,11 @@ class Softmax(Layer):
 
     def inverse(self, vector):
         vec = np.copy(vector).astype('float')
-        vec[vec == 0] = 0.00001
-        return vec
+        vec[vec == 0] = 10**(-10)
+        ln = np.log(vec)
+        lowest, highest = min(ln), max(ln)
+        diffmid = (highest - lowest) / 2
+        return ln + diffmid
 
     def __repr__(self):
         return 'Softmax(%s)' % self.shape
