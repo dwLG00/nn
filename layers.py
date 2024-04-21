@@ -172,3 +172,48 @@ class Softmax(Layer):
 
     def __repr__(self):
         return 'Softmax(%s)' % self.shape
+
+class DirectProduct(Layer):
+    def __init__(self, *layers):
+        self.shape = (
+            sum(layer.shape[0] for layer in layers),
+            sum(layer.shape[1] if len(layer.shape) > 1 else layer.shape[0] for layer in layers)
+        )
+        self.layers = layers
+
+    def apply(self, vector):
+        i = 0
+        out = None
+        for layer in self.layers:
+            dimension = layer.shape[0]
+            vec = vector[i:i + dimension]
+            res = layer.apply(vec)
+            if out == None:
+                out = res
+            else:
+                out = np.concatenate([out, res])
+            i += dimension
+        return out
+
+    def derivative(self, vector):
+        i = 0
+        out = None
+        for layer in self.layers:
+            dimension = layer.shape[0]
+            vec = vector[i:i + dimension]
+            deriv = layer.derivative(vec)
+            if out == None:
+                out = deriv
+            else:
+                out = np.concatenate([out, deriv])
+            i += dimension
+        return out
+
+class Bifurcate(Layer):
+    def __init__(self, input_size, n):
+        self.shape = (input_size, n * input_size)
+        self.n_copies = n
+        identity = np.identity(input_size)
+        identity_block = np.block([[identity] * n])
+        zero_block = np.zeros((n * input_size, (n - 1) * input_size))
+        self.matrix = np.block([identity_block, zero_block
