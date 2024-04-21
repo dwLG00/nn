@@ -11,7 +11,7 @@ def rolling_stop(n, bias=1):
     return lambda net_errors: len(net_errors) > (n + 1) and sum(net_errors[-(n+1):-1]) / n < bias * net_errors[-1]
 
 
-class NeuralNet:
+class NeuralNet(layers.Layer):
     def __init__(self, *l):
         self.layers = l
         self.length = len(self.layers)
